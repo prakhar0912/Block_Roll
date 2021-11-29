@@ -96,10 +96,7 @@ sound:
 	ret 
 
 
-partner1: db 'UMAIR HABIB (L16-4348)',0
-partner2: db 'MOIZ AHMED FARASAT (L16-4349)',0
-loader:db 'Loading:',0
-press: db 'Press Escape to Continue',0
+welcome: db 'PRESS ENTER TO START   ',0
 
 startpage:
 	pusha ;This instruction pushes all the general purpose registers onto the stack in the following order: AX, CX, DX, BX, SP, BP, SI, DI.
@@ -107,7 +104,7 @@ startpage:
 	XOR AL, AL     ;
 	XOR CX, CX     ; Upper left corner CH=row, CL=column
 	MOV DX, 184FH  ; lower right corner DH=row, DL=column 
-	MOV BH, 45h   ; background color of startpage
+	MOV BH, 07h   ; background color of startpage
 	INT 10H ;video BIOS
 	;(1): this whole chunk sets up the red background color of the start page
 
@@ -119,32 +116,10 @@ startpage:
 	mov dx,0x1022 ;on which row and col to print
 	push cs
 	pop es ; segment of string/offset of string
-	mov bp, partner1 ; offset of string/string contents
+	mov bp, welcome ; offset of string/string contents
 	int 0x10 ; call BIOS video service
 	;(2)print partner 1 onto the screen
 
-	mov ah, 0x13 ; service 13 - print string
-	mov al, 1 ; subservice 01 � update cursor
-	mov bh, 0 ; output on page 0
-	mov bl, 75 ; normal attrib
-	mov cx, 29 ; length of string
-	mov dx,0x1122
-	push cs
-	pop es ; segment of string
-	mov bp, partner2 ; offset of string
-	int 0x10 ; call BIOS video service
-	;(2)print partner 2 onto the screen
-
-	mov ah, 0x13 ; service 13 - print string
-	mov al, 1 ; subservice 01 � update cursor
-	mov bh, 0 ; output on page 0
-	mov bl, 75 ; normal attrib
-	mov cx, 8 ; length of string
-	mov dx,0x1322
-	push cs
-	pop es ; segment of string
-	mov bp, loader ; offset of string
-	int 0x10 ; call BIOS video service
 
 	push 0xb800 ; (Needed to raw print onto screen)Address of text screen video memory in real mode for colored monitors
 	pop es
@@ -176,9 +151,9 @@ startpage:
 	mov word[es:1966],ax
 	mov word[es:1968],ax
 	mov word[es:1970],ax
-	mov al,'R'
+	mov al,'L'
 	mov word[es:1976],ax
-	mov al,'I'
+	mov al,'O'
 	mov word[es:1978],ax
 	mov al,'C'
 	mov word[es:1980],ax
@@ -213,61 +188,9 @@ startpage:
 	mov word[es:2028],ax
 	mov al,'L'
 	mov word[es:2030],ax
-	mov ah,75;outline color on character
-	mov al,178;block character
-	mov cx, 15; counter for loading loop time
-	mov di,3126 ;column number to leave print cursor at
+	
 	popa
 	ret
-	
-; loading:
-; 	mov bx,0xffff;load bx with the number from which to count down from
-;     call delay;delay that decrements bx till 0
-;     mov bx,0xffff
-;     call delay
-;     mov bx,0xffff
-;     call delay
-;     mov bx,0xffff
-;     call delay
-;     mov word[es:di],ax;print block character onto screen
-;     add di,2 ;incriment column to print character to
-;     loop loading
-
-
-;     mov ah, 0x13 ; service 13 - print string
-;     mov al, 1 ; subservice 01 � update cursor
-;     mov bh, 0 ; output on page 0
-;     mov bl, 75 ; normal attrib
-;     mov cx, 24 ; length of string
-;     mov dx,0x1516
-;     push cs
-;     pop es ; segment of string
-;     mov bp, press ; offset of string
-;     int 0x10 ; call BIOS video service
-
-; 	MOV AH, 06h    ; Scroll up function on console
-; 	XOR AL, AL     ;
-; 	XOR CX, CX     ; Upper left corner CH=row, CL=column
-; 	MOV DX, 184FH  ; lower right corner DH=row, DL=column 
-; 	MOV BH, 0h   ; background color of startpage
-; 	INT 10H ;video BIOS
-
-; 	popa
-; 	xor ax,ax
-; 	xor bx,bx
-; 	xor cx, cx
-; 	xor dx, dx
-; 	call clrscr
-; 	pop ax
-;     ret ;sends control back to the top?(prob)
-
-
-delay:
-    dec bx
-    cmp bx,0
-    jne delay
-    ret
-
 start_menu:
 	push ax
 	call clrscr
@@ -352,24 +275,6 @@ printnum:
     pop bp
     ret 4
 
-
-; youLose:
-	; push ax
-	
-	; ;call clrscr
-	; mov ax , 1990
-	; push ax
-	; mov ax , Lose_str
-	; push ax
-	; mov ax , 8
-	; push ax
-	; call printstr
-	
-	; ;jmp endgame
-	
-	; pop ax
-; ret
-
 callmee
 	
 	mov ax , 1990
@@ -400,7 +305,7 @@ printstr:
 	mov ah, 0x07 ; normal attribute fixed in al
 	nextchar: 
 	mov al, [si] ; load next char of string
-	mov [es:di], ax ; show this char on screen
+	mov [es:di], ax ; show this char on screenf
 	add di, 2 ; move to next screen location
 	add si, 1 ; move to next char in string
 	loop nextchar ; repeat the operation cx times
@@ -1252,7 +1157,6 @@ start:
 	sti ; enable interrupts
 	
     call startpage
-	; call start_menu
 menu_loop:
 	cmp byte[call_instruction_menu] , 1
 	je instruction
