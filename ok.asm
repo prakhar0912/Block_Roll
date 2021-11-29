@@ -853,7 +853,7 @@ ball:
 					mov word[cs:previous],di
 					sub byte[cs:live],1
 					cmp byte[cs:live],0
-					;call print_lives
+					call print_lives
 					jne endii
 						;push cs
 						;jmp far endgame;;;;;;;;;;;;;;;;;;;
