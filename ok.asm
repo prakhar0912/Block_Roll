@@ -104,14 +104,14 @@ startpage:
 	XOR AL, AL     ;
 	XOR CX, CX     ; Upper left corner CH=row, CL=column
 	MOV DX, 184FH  ; lower right corner DH=row, DL=column 
-	MOV BH, 07h   ; background color of startpage
+	MOV BH, 02h   ; background color of startpage
 	INT 10H ;video BIOS
 	;(1): this whole chunk sets up the red background color of the start page
 
 	mov ah, 0x13 ; service 13 - print string onto console
 	mov al, 1 ; subservice 01 � update cursor
 	mov bh, 0 ; output on page 0
-	mov bl, 75 ; normal attrib/color
+	mov bl, 15 ; normal attrib/color
 	mov cx, 22 ; length of string
 	mov dx,0x1022 ;on which row and col to print
 	push cs
@@ -123,7 +123,7 @@ startpage:
 
 	push 0xb800 ; (Needed to raw print onto screen)Address of text screen video memory in real mode for colored monitors
 	pop es
-	mov ah,75;outline color
+	; mov ah,75;outline color
 	mov al,178;block character
 	mov word[es:1000],ax
 	mov word[es:1002],ax
@@ -349,11 +349,11 @@ time_str: db 'TIME '
 printStrings:
 	push ax
 	
-	mov ax , 280
+	mov ax , 280 ;position on screen
 	push ax
 	mov ax , Lives_str
 	push ax
-	mov ax , 5
+	mov ax , 5 ;length of string
 	push ax
 	call printstr
 	
@@ -391,7 +391,7 @@ clrscr:
 	pop cx
 	pop ax
 	pop es
-ret 
+	ret 
 boader:
 	push ax
 	push es
@@ -441,7 +441,7 @@ boader:
 	pop di
 	pop es
 	pop ax
-ret
+	ret
 
 brick_remove:
 	push es
@@ -517,15 +517,15 @@ bricks:
 	mov si , 0
 	mov bx , 0
 	
-	cld
+	cld; clear the direction flag
 	
 	brickline1:
 		cmp di , 936
 		ja brickline2
 			mov ah , 0x90
-			mov al , 0x20
-			mov cx , 6
-			rep stosw
+			mov al , 0x20 ; position
+			mov cx , 6 ;length of string
+			rep stosw ;does the printing
 			mov cx , 3
 			mov ax, 0x0720 
 			rep stosw
@@ -574,7 +574,7 @@ bricks:
 	pop bx
 	pop cx
 	pop es
-ret
+	ret
 clearStacker:
 	push bp
 	mov bp , sp
@@ -590,7 +590,7 @@ clearStacker:
 	mov cx , 13
 	mov di , [bp+4]
 	
-	rep stosw
+	rep stosw;auto imcriment/decriment value of di by 2 based on DF 
 	mov di,[cs:preBall]
 	mov word[es:di],ax
 	
@@ -599,7 +599,7 @@ clearStacker:
 	pop ax
 	pop es
 	pop bp
-ret	2
+	ret	2
 printStacker:
 	push bp
 	mov bp , sp
@@ -633,7 +633,7 @@ printStacker:
 	
 	cmp byte[cs:StayOnStacker],1
 	jne endi
-		mov al,'O'
+		mov al,'O' ; placing ball back on stacker
 		mov ah,0x07
 		mov word[es:di],ax
 		mov [cs:preBall],di
@@ -661,7 +661,7 @@ stacker:
 		mov ax, word[cs:pre_stack_pos]
 		add ax , 8
 		cmp ax , word[cs:right_edge]
-		ja exit1
+		ja exit1 ; jump if above
 			mov di, word[cs:pre_stack_pos]
 			push di
 			call clearStacker
@@ -674,7 +674,7 @@ stacker:
 		mov ax, word[cs:pre_stack_pos]
 		sub ax , 8
 		cmp ax , word[cs:left_edge]
-		jb exit1
+		jb exit1 ; jump if below
 			mov di, word[cs:pre_stack_pos]
 			push di
 			call clearStacker
@@ -754,7 +754,7 @@ nextposition:
 	pop cx
 	pop bx
 	pop ax
-ret
+	ret
 left_right:
 	push ax
 	
@@ -896,7 +896,7 @@ ball:
 	pop bx
 	pop ax
 	pop es
-ret 
+	ret 
 call_instruction_menu: db 0
 instruction_menu:
 	push ax
@@ -983,7 +983,7 @@ kbisr:
 	mov word[cs:right_] , 0
 	mov word[cs:left_] , 0
 	mov ax, 0xb800
-	mov es, ax 
+	mov es, ax ;Needed to raw print onto screen
 	
 	in al, 0x60 ; read a char from keyboard port
 	
@@ -1052,7 +1052,7 @@ main_game:
 		pop es
 		pop ax
 		jmp far [cs:oldisr] 
-	exit:
+	exit: ;says that interrupt is done
 		mov al, 0x20
 		out 0x20, al 
 	pop es
@@ -1077,7 +1077,7 @@ timer:
 		po:
 		inc word[cs:bonus]
 		cmp word[cs:bonus],2160
-		jnbe pk
+		jnbe pk ; jump if above or equal
 			cmp word[cs:total_bricks],0
 			jne pk
 				add word[cs:score],50
@@ -1098,7 +1098,7 @@ timer:
 		cmp byte[cs:tickcount], 2
 		jne endof
 			call ball
-			call boader
+			call boader ;when you hit red or too much time?
 			mov byte[cs:tickcount],0
 			;jmp endiii
 		endof:
@@ -1108,7 +1108,7 @@ timer:
 		;endiii:
 		mov al, 0x20
 		out 0x20, al ; end of interrupt
-iret ; return from interrupt 
+	iret ; return from interrupt 
 
 print_lives:
 	push ax
