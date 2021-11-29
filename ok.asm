@@ -355,7 +355,7 @@ printStrings:
 	push ax
 	mov ax , 5
 	push ax
-	call printstr_B
+	call printstr
 	
 	mov ax , 162
 	push ax
@@ -363,7 +363,7 @@ printStrings:
 	push ax
 	mov ax , 5
 	push ax
-	call printstr_B
+	call printstr
 	
 	mov ax , 390
 	push ax
@@ -371,7 +371,7 @@ printStrings:
 	push ax
 	mov ax , 5
 	push ax
-	call printstr_B
+	call printstr
 	
 	pop ax
 ret
