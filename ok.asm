@@ -465,7 +465,7 @@ check:
 	add si , 2
 	
 	cmp dx , ax
-	jae checknext
+	jae checknext 
 	loop check
 	jmp end_ofFunc
 
@@ -476,7 +476,7 @@ checknext:
 	jmp end_ofFunc
 
 remove:	
-	cmp ax,846
+	cmp ax,846 ;red block location on screen
 	jne np
 		mov byte[cs:solid],1
 	np:
@@ -486,7 +486,7 @@ remove:
 	mov di , word[cs:bricks_start_location + si]
 	mov cx , 6
 	mov ax , 0x0720
-	rep stosw
+	rep stosw ;add space onto screen where block used to be
 	;all sound
 	add word[cs:score] , 5
 	dec word[cs:total_bricks]
@@ -586,8 +586,8 @@ clearStacker:
 	mov ax , 0xb800
 	mov es , ax
 	
-	mov ax , 0x0720
-	mov cx , 13
+	mov ax , 0x0720 ;space character
+	mov cx , 13 ; length of string
 	mov di , [bp+4]
 	
 	rep stosw;auto imcriment/decriment value of di by 2 based on DF 
@@ -693,9 +693,9 @@ calculate_position: ;;;;				first push x then push y
 	push ax
 	
 	mov al , 80
-	mul byte[bp+4]
-	add ax , [bp+6]
-	shl ax ,1
+	mul byte[bp+4] ;getting row calculated
+	add ax , [bp+6] ;adding column
+	shl ax ,1 ;basically ax * 2
 	
 	mov word[cs:calculated_location] , ax
 	
@@ -712,22 +712,22 @@ nextposition:
 	mov bx,[cs:colume]
 	mov cx,[cs:row]
 
-	cmp word[cs:colume],3
+	cmp word[cs:colume],3 ;left column
 	jne nextcond4
 		mov al,1
 		jmp rowCheck3
 	nextcond4:
-		cmp word[cs:colume],77
+		cmp word[cs:colume],77 ;right column
 		jne rowCheck3
 			mov al,0
 			
 	rowCheck3:
-		cmp word[cs:row],4
+		cmp word[cs:row],4 ;top row
 		jne nextcond5
 			mov ah,1
 			jmp printingLocation1
 		nextcond5:
-			cmp word[cs:row],22
+			cmp word[cs:row],22 ;bottom row
 			jne printingLocation1
 				mov ah,0
 	
@@ -788,13 +788,13 @@ ball:
 	mov es,ax
 	
 	mov di,[cs:previous]
-	mov word[es:di],0x0720
+	mov word[es:di],0x0720 ;print space onto previous ball position
 	call nextposition
 	mov di,[cs:calculated_location]
-	mov ax,word[es:di]
-	cmp ah,0x07
+	mov ax,word[es:di] ;character in expected next spot
+	cmp ah,0x07 ;if spot has a space character
 	je R
-		cmp ah,0xb0
+		cmp ah,0xb0 ;if expected next spot has stacker
 		je n
 		call brick_remove
 		jmp n1
